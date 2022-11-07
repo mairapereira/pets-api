@@ -17,17 +17,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import py.com.pegasus.test.pets.exceptions.ApiException;
 import py.com.pegasus.test.pets.exceptions.ApiExceptionType;
 import py.com.pegasus.test.pets.models.Pet;
+import py.com.pegasus.test.pets.models.Pets;
 import py.com.pegasus.test.pets.models.request.PatchPetData;
 import py.com.pegasus.test.pets.models.request.PetData;
 import py.com.pegasus.test.pets.services.PetsService;
 
-import static py.com.pegasus.test.pets.constants.ApiSettings.API_VERSION;
 import static py.com.pegasus.test.pets.constants.ApiErrorCodes.GENERIC_ERROR;
+import static py.com.pegasus.test.pets.constants.ApiSettings.API_VERSION;
 import static py.com.pegasus.test.pets.exceptions.ApiExceptionBuilder.buildApiExceptionFrom;
 
 @RestController
@@ -51,6 +53,28 @@ public class PetsController {
     private Pet findPet(@PathVariable(name = "pet-id") String petId) throws ApiException {
         try {
             return petService.findById(petId);
+        } catch (ApiException ae) {
+            log.error("Ocurrio un error obtener los datos de la mascota", ae);
+            throw ae;
+        } catch (Exception e) {
+            log.error(ERROR_INESPERADO_CHECKOUT, e);
+            throw buildApiExceptionFrom(GENERIC_ERROR, ApiExceptionType.APPLICATION);
+        }
+    }
+
+    @Operation(summary = "Obtiene el listado de mascotas que cumplan con los criterios de busqueda")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Pet.class))),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "404", description = "Recurso no encontrado"),
+            @ApiResponse(responseCode = "500", description = "Error inesperado")})
+
+    @GetMapping
+    @ResponseStatus(code = HttpStatus.OK)
+    private Pets findPets(@RequestParam(name = "owner", required = false) String ownerId) throws ApiException {
+        try {
+            return petService.findAllByOwner(ownerId);
         } catch (ApiException ae) {
             log.error("Ocurrio un error obtener los datos de la mascota", ae);
             throw ae;

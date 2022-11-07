@@ -7,12 +7,14 @@ import py.com.pegasus.test.pets.exceptions.ApiException;
 import py.com.pegasus.test.pets.exceptions.ApiExceptionBuilder;
 import py.com.pegasus.test.pets.exceptions.ApiExceptionType;
 import py.com.pegasus.test.pets.models.Pet;
+import py.com.pegasus.test.pets.models.Pets;
 import py.com.pegasus.test.pets.models.request.PatchPetData;
 import py.com.pegasus.test.pets.models.request.PetData;
 import py.com.pegasus.test.pets.repositories.PetsRepository;
 import py.com.pegasus.test.pets.repositories.entities.PetsEntity;
 import py.com.pegasus.test.pets.services.mappers.PetsMapper;
 
+import java.util.List;
 import java.util.UUID;
 
 import static py.com.pegasus.test.pets.constants.ApiErrorCodes.PET_NOT_FOUND;
@@ -32,11 +34,23 @@ public class PetsServiceImpl implements PetsService {
     private final SecurityAuthentication securityAuthentication;
 
     @Override
-    public Pet findById(String id) throws ApiException {
-        log.info("Intentaremos obtener los datos de la mascota");
+    public Pets findAllByOwner(String id) throws ApiException {
+        log.info("Intentaremos obtener todas las mascotas con owner id {}", id);
 
         //validamos datos de entrada
         validatFindPetData(id);
+
+        //obtenemos los datos de la mascota
+        List<PetsEntity> petsEntities = petsRepository.findAllByOwner(UUID.fromString(id));
+        List<Pet> pets = PetsMapper.toPetDomainList(petsEntities);
+
+        log.info("Se obtuvieron {} mascotas", pets.size());
+        return Pets.builder().pets(pets).build();
+    }
+
+    @Override
+    public Pet findById(String id) throws ApiException {
+        log.info("Intentaremos obtener los datos de la mascota con criterios de busqueda {}", id);
 
         //obtenemos los datos de la mascota
         Pet pet = petsRepository.findById(UUID.fromString(id))

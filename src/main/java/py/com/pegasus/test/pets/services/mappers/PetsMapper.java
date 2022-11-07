@@ -7,7 +7,10 @@ import py.com.pegasus.test.pets.models.request.PetData;
 import py.com.pegasus.test.pets.repositories.entities.PetsEntity;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class PetsMapper {
@@ -20,7 +23,7 @@ public class PetsMapper {
                         .birthDate(ent.getBirthDate())
                         .breed(ent.getBreed())
                         .weight(ent.getWeight())
-                        .owner(ent.getOwner())
+                        .owner(ent.getOwner().toString())
                         .createdAt(ent.getCreatedAt())
                         .createdBy(ent.getCreatedBy())
                         .modifiedAt(ent.getModifiedAt())
@@ -28,6 +31,14 @@ public class PetsMapper {
                         .build())
                 .orElse(null);
 
+    }
+
+    public static List<Pet> toPetDomainList(List<PetsEntity> entityList) {
+        return Optional.ofNullable(entityList)
+                .map(list -> list.stream()
+                        .map(pet -> mapPetEntityToDomain(pet))
+                        .collect(Collectors.toList()))
+                .orElse(null);
     }
 
     public static PetsEntity buildPetEntityToCreate(PetData data, String user) {
@@ -39,7 +50,7 @@ public class PetsMapper {
                         .birthDate(data.getBirthDate())
                         .breed(data.getBreed())
                         .weight(data.getWeight())
-                        .owner(data.getOwner())
+                        .owner(UUID.fromString(data.getOwner()))
                         .createdAt(now)
                         .createdBy(user)
                         .modifiedAt(now)
@@ -58,7 +69,7 @@ public class PetsMapper {
                         .birthDate(data.getBirthDate())
                         .breed(data.getBreed())
                         .weight(data.getWeight())
-                        .owner(data.getOwner())
+                        .owner(UUID.fromString(data.getOwner()))
                         .createdAt(originalPet.getCreatedAt())
                         .createdBy(originalPet.getCreatedBy())
                         .modifiedAt(now)

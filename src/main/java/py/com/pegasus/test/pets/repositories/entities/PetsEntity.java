@@ -40,5 +40,5 @@ public class PetsEntity extends AbstractBaseEntity {
 
     private Double weight;
 
-    private String owner;
+    private UUID owner;
 }
