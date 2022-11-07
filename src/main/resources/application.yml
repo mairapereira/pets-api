@@ -1,0 +1,26 @@
+server:
+  servlet:
+    context-path: /pets-api
+  port: 8081
+spring:
+  application:
+    name: pets-api
+  h2:
+    console.path: /h2-console
+    console.settings.trace: false
+    console.settings.web-allow-others: false
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+  datasource:
+    url: jdbc:h2:mem:petsdb
+    username: pegasus
+    password: p3g@sus@t3$t
+    driverClassName: org.h2.Driver
+  security:
+    user:
+      name: pegasus
+      password: test123
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
